@@ -33,6 +33,8 @@ NSInteger sort(id a, id b, void *reverse) {
         
         //[self documentsFolderSize];
         
+        //NSLog(path);
+        
     }
     return self;
 }
@@ -98,18 +100,18 @@ NSInteger sort(id a, id b, void *reverse) {
     
     CGContextConcatCTM(context, CGAffineTransformMakeRotation(0));
     
-    CGAffineTransform flipVertical = CGAffineTransformMake(
-                                                           1, 0, 0, -1, 0, CGImageGetHeight(image)
-                                                           );
-    CGContextConcatCTM(context, flipVertical); 
+//    CGAffineTransform flipVertical = CGAffineTransformMake(
+//                                                           1, 0, 0, -1, 0, CGImageGetHeight(image)
+//                                                           );
+//    CGContextConcatCTM(context, flipVertical); 
     
     
     
-    CGAffineTransform flipHorizontal = CGAffineTransformMake(
-                                                             -1.0, 0.0, 0.0, 1.0, CGImageGetWidth(image), 0.0
-                                                             );
-    
-    CGContextConcatCTM(context, flipHorizontal); 
+//    CGAffineTransform flipHorizontal = CGAffineTransformMake(
+//                                                             -1.0, 0.0, 0.0, 1.0, CGImageGetWidth(image), 0.0
+//                                                             );
+//    
+//    CGContextConcatCTM(context, flipHorizontal); 
     
     
     CGContextDrawImage(context, CGRectMake(0, 0, CGImageGetWidth(image), 
@@ -411,6 +413,7 @@ NSInteger sort(id a, id b, void *reverse) {
 
 - (void)dealloc
 {
+    [imgscreen release];
     [super dealloc];
 }
 
@@ -432,6 +435,15 @@ NSInteger sort(id a, id b, void *reverse) {
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+    
+    NSFileManager *manager = [NSFileManager defaultManager];
+    NSString *documents = [[Utils documentsDirectory] stringByAppendingPathComponent:currentWorkspace];
+    [manager removeItemAtPath:[documents stringByAppendingPathComponent:@"movie.mov"] error:nil];
+    NSArray *files = [manager contentsOfDirectoryAtPath:documents error:nil];
+    NSString *filename = [documents stringByAppendingPathComponent:[files objectAtIndex:0]];
+    UIImage *first = [UIImage imageWithContentsOfFile:filename];
+    [imgscreen setImage:first];
+
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -452,6 +464,8 @@ NSInteger sort(id a, id b, void *reverse) {
 
 - (void)viewDidUnload
 {
+    [imgscreen release];
+    imgscreen = nil;
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;

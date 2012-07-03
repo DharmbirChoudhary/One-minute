@@ -104,9 +104,12 @@
     }
     
     
-    UIImage *currentImage = [self.imageView image]; 
+    UIImage *currentImage = [self.imageView image];
+        
     NSData *imageData = UIImagePNGRepresentation(currentImage);
    
+    
+    
     NSString *filePath = [[Utils documentsDirectory] stringByAppendingFormat:@"/%@/frame_%d.png", workspaceName,imageCounter];
     
     [imageData writeToFile:filePath atomically:NO];
@@ -228,7 +231,8 @@
 	// Set the video output to store frame in BGRA (It is supposed to be faster)
 	NSString* key = (NSString*)kCVPixelBufferPixelFormatTypeKey; 
 	NSNumber* value = [NSNumber numberWithUnsignedInt:kCVPixelFormatType_32BGRA]; 
-	NSDictionary* videoSettings = [NSDictionary dictionaryWithObject:value forKey:key]; 
+	NSMutableDictionary* videoSettings = [NSMutableDictionary dictionaryWithObject:value forKey:key]; 
+    [videoSettings setObject:AVVideoCodecH264 forKey:AVVideoCodecKey];
 	[captureOutput setVideoSettings:videoSettings]; 
 	/*And we create a capture session*/
 	self.captureSession = [[AVCaptureSession alloc] init];
@@ -292,6 +296,8 @@
 didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer 
 	   fromConnection:(AVCaptureConnection *)connection 
 { 
+    _conn = connection;
+
 	/*We create an autorelease pool because as we are not in the main_queue our code is
 	 not executed in the main thread. So we have to create an autorelease pool for the thread we are in*/
 	
@@ -316,16 +322,16 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     /*We release some components*/
     CGContextRelease(newContext); 
     CGColorSpaceRelease(colorSpace);
-    
-    /*We display the result on the custom layer. All the display stuff must be done in the main thread because
+
+     /*We display the result on the custom layer. All the display stuff must be done in the main thread because
 	 UIKit is no thread safe, and as we are not in the main thread (remember we didn't use the main_queue)
 	 we use performSelectorOnMainThread to call our CALayer and tell it to display the CGImage.*/
-	//[self.customLayer performSelectorOnMainThread:@selector(setContents:) withObject: (id) newImage waitUntilDone:YES];
+//	[self.customLayer performSelectorOnMainThread:@selector(setContents:) withObject: (id) newImage waitUntilDone:YES];
 	
     
 	/*We display the result on the image view (We need to change the orientation of the image so that the video is displayed correctly).
 	 Same thing as for the CALayer we are not in the main thread so ...*/
-	UIImage *image= [UIImage imageWithCGImage:newImage scale:1 orientation:UIImageOrientationDown];
+	UIImage *image= [UIImage imageWithCGImage:newImage];
 	
 //    + (UIImage *)imageWithCGImage:(CGImageRef)imageRef scale:(CGFloat)scale orientation:(UIImageOrientation)orientation
     
@@ -341,9 +347,22 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 	[pool drain];
 } 
 
+- (void) didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+
+    [_conn setVideoOrientation:self.interfaceOrientation];
+}
 
 - (BOOL) shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
-    if (toInterfaceOrientation == UIInterfaceOrientationLandscapeLeft) {
+    if (toInterfaceOrientation == UIInterfaceOrientationLandscapeLeft || toInterfaceOrientation == UIInterfaceOrientationLandscapeRight) {
+        
+//        
+//        NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
+//        [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+//        [notificationCenter addObserver:self
+//                               selector:@selector(deviceOrientationDidChange) 
+//                                   name:UIDeviceOrientationDidChangeNotification object:nil];
+//        [self setOrientation:toInterfaceOrientation];
+        
         return YES;
     }
    return NO;

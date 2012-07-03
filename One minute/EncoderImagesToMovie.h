@@ -15,6 +15,7 @@
     
     IBOutlet UILabel *fpsLabel;
     IBOutlet UISlider *fpsSlider;
+    IBOutlet UIImageView *imgscreen;
     
     NSString *currentWorkspace;
 }

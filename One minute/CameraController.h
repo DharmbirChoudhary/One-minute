@@ -27,6 +27,8 @@
 	CALayer *_customLayer;
 	AVCaptureVideoPreviewLayer *_prevLayer;
     
+    AVCaptureConnection *_conn;
+    
     IBOutlet UISlider *slider;
     IBOutlet UILabel *counter;
 

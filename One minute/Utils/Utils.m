@@ -33,7 +33,8 @@
 
 + (BOOL) iphone4 {
 	NSString *platform = [Utils getPlatform];
-	if ([platform isEqualToString:@"iPhone3,1"] ||
+    NSLog(@"%@", platform);
+	if ([platform isEqualToString:@"iPad3,3"] || [platform isEqualToString:@"iPhone3,1"] ||
 		[platform isEqualToString:@"iPhone3,3"]) return YES;
 	return NO;
 }
