@@ -172,8 +172,7 @@ NSInteger sort(id a, id b, void *reverse) {
     writerInput.expectsMediaDataInRealTime = YES;
     
     //Start a session:
-    BOOL start = [videoWriter startWriting];
-    NSLog(@"Session started? %d", start);
+    [videoWriter startWriting];
     
     [videoWriter startSessionAtSourceTime:kCMTimeZero];
     
@@ -184,10 +183,10 @@ NSInteger sort(id a, id b, void *reverse) {
     if (result == NO) //failes on 3GS, but works on iphone 4
         NSLog(@"failed to append buffer");
     
-    if(buffer)
+    if(buffer) {
         CVBufferRelease(buffer);
+    }
     
-    [NSThread sleepForTimeInterval:0.05];
 
     
     int reverseSort = NO;
@@ -201,18 +200,26 @@ NSInteger sort(id a, id b, void *reverse) {
     int i = 0;
     for (NSString *filename in newArray)
     {
-        if (adaptor.assetWriterInput.readyForMoreMediaData) 
-        {
+        if (adaptor.assetWriterInput.readyForMoreMediaData) {
             
             i++;
-            NSLog(@"inside for loop %d %@ ",i, filename);
             CMTime frameTime = CMTimeMake(1, fps);
-            CMTime lastTime=CMTimeMake(i, fps); 
-            CMTime presentTime=CMTimeAdd(lastTime, frameTime);
+            CMTime lastTime = CMTimeMake(i, fps); 
+            CMTime presentTime = CMTimeAdd(lastTime, frameTime);
             
             NSString *filePath = [documents stringByAppendingPathComponent:filename];
             
-            //            NSString *imgName = [NSString stringWithFormat:@"frame%d.png",i];
+            
+            // INSERT IMAGE FOR preview
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    UIImage *newImg = [UIImage imageWithContentsOfFile:filePath];
+                    [imgscreen setImage:newImg];
+                });
+            });
+                               
+            
+            
             UIImage *imgFrame = [UIImage imageWithContentsOfFile:filePath] ;
             buffer = [self pixelBufferFromCGImage:[imgFrame CGImage]];
             BOOL result = [adaptor appendPixelBuffer:buffer withPresentationTime:presentTime];
@@ -222,17 +229,18 @@ NSInteger sort(id a, id b, void *reverse) {
                 NSLog(@"failed to append buffer");
                 NSLog(@"The error is %@", [videoWriter error]);
             }
-            if(buffer)
+        
+            if(buffer) {
                 CVBufferRelease(buffer);
-            [NSThread sleepForTimeInterval:0.05];
-        }
-        else
-        {
+            }
+
+        
+        } else {
             NSLog(@"error");
             i--;
         }
         [self performSelectorOnMainThread:@selector(addprogress) withObject:nil waitUntilDone:YES];
-        [NSThread sleepForTimeInterval:0.02];
+        
     }
     
     //Finish the session:
@@ -245,9 +253,6 @@ NSInteger sort(id a, id b, void *reverse) {
     NSLog(@"Movie created successfully");
     
     [self performSelectorOnMainThread:@selector(displaySheet) withObject:nil waitUntilDone:YES];
-    
-    
-    
 }
 
 
@@ -413,6 +418,10 @@ NSInteger sort(id a, id b, void *reverse) {
 
 - (void)dealloc
 {
+    if (fileViewerController) {
+        [fileViewerController release];
+        [currentWorkspace release];
+    }
     [imgscreen release];
     [super dealloc];
 }
@@ -430,20 +439,38 @@ NSInteger sort(id a, id b, void *reverse) {
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    NSFileManager *manager = [NSFileManager defaultManager];
+    NSString *documents = [[Utils documentsDirectory] stringByAppendingPathComponent:currentWorkspace];
+    [manager removeItemAtPath:[documents stringByAppendingPathComponent:@"movie.mov"] error:nil];
+    NSArray *files = [manager contentsOfDirectoryAtPath:documents error:nil];
+    
+    if ([files count] > 0) {
+        NSString *filename = [documents stringByAppendingPathComponent:[files objectAtIndex:0]];
+        UIImage *first = [UIImage imageWithContentsOfFile:filename];
+        [imgscreen setImage:first];        
+    } else {
+        [imgscreen setImage:nil];
+    }
+
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
     
-    NSFileManager *manager = [NSFileManager defaultManager];
-    NSString *documents = [[Utils documentsDirectory] stringByAppendingPathComponent:currentWorkspace];
-    [manager removeItemAtPath:[documents stringByAppendingPathComponent:@"movie.mov"] error:nil];
-    NSArray *files = [manager contentsOfDirectoryAtPath:documents error:nil];
-    NSString *filename = [documents stringByAppendingPathComponent:[files objectAtIndex:0]];
-    UIImage *first = [UIImage imageWithContentsOfFile:filename];
-    [imgscreen setImage:first];
+        
+    
+    UIBarButtonItem *but = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(fileList)];
+    [self.navigationItem setRightBarButtonItem:but];
+    [but release];
+}
 
+- (void) fileList {
+    if (!fileViewerController) {
+        fileViewerController = [[WorkspaceFileListViewer alloc] initWithNibName:@"WorkspaceFileListViewer" bundle:nil];
+    }
+    [fileViewerController setCurrentWorkspace:currentWorkspace];
+    [self.navigationController pushViewController:fileViewerController animated:YES];
 }
 
 - (void)viewWillDisappear:(BOOL)animated

@@ -9,7 +9,6 @@
 
 #import "EncoderImagesToMovie.h"
 
-#import "WorkspaceFileListViewer.h"
 #import "WorkspacesController.h"
 #import "WorkspaceItem.h"
 
@@ -33,6 +32,7 @@
         encodeController = [[EncoderImagesToMovie alloc] initWithNibName:@"EncoderImagesToMovie" bundle:nil];
     }
     [encodeController setWorkspaceName:name];
+    [encodeController.navigationItem setTitle:name];
     [self.navigationController pushViewController:encodeController animated:YES];
 }
 
@@ -82,7 +82,7 @@
         
         x += 158;
         c++;
-        if (c == 3) {
+        if (x+158 > self.view.frame.size.width) {
             y += 105;
             x = 5;
             c = 0;
@@ -93,7 +93,7 @@
         y += 105;
     }
     
-    [scrollView setContentSize:CGSizeMake(480, y)];
+    [scrollView setContentSize:CGSizeMake(self.view.frame.size.width, y)];
 }
 
 
@@ -123,11 +123,22 @@
         
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
+
+    UIViewController *vc = [[self.navigationController viewControllers] objectAtIndex:[[self.navigationController viewControllers] count]-2];
     
-    if (updateInDidLoad) {
-        [self updateWorkspaces];
-    }
+    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:vc action:@selector(camera)];
+    [self.navigationItem setLeftBarButtonItem:item];
+    [item release];
+    
+//    if (updateInDidLoad) {
+//        [self updateWorkspaces];
+//    }
     [self.navigationItem setTitle:@"Workspaces"];
+}
+
+- (void) viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self updateWorkspaces];
 }
 
 - (void)viewDidUnload

@@ -29,7 +29,7 @@
     if (cameraController == nil) {
         cameraController = [[CameraController alloc] initWithNibName:@"CameraController" bundle:nil];
     }
-    
+    [cameraController.navigationItem setTitle:@"Camera"];
     [self.navigationController pushViewController:cameraController animated:YES];
 }
 
@@ -64,6 +64,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    [self workspace];
     // Do any additional setup after loading the view from its nib.
 }
 

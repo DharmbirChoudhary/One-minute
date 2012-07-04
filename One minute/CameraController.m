@@ -106,11 +106,11 @@
     
     UIImage *currentImage = [self.imageView image];
         
-    NSData *imageData = UIImagePNGRepresentation(currentImage);
+    NSData *imageData = UIImageJPEGRepresentation(currentImage, 0.90);
    
     
     
-    NSString *filePath = [[Utils documentsDirectory] stringByAppendingFormat:@"/%@/frame_%d.png", workspaceName,imageCounter];
+    NSString *filePath = [[Utils documentsDirectory] stringByAppendingFormat:@"/%@/frame_%d.jpg", workspaceName,imageCounter];
     
     [imageData writeToFile:filePath atomically:NO];
     imageCounter++;

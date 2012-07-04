@@ -14,5 +14,6 @@
     NSMutableArray *filesList;
     
 }
+@property (nonatomic, retain) NSString *currentWorkspace;
 
 @end

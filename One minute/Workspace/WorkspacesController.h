@@ -21,7 +21,6 @@
     
     EncoderImagesToMovie *encodeController;
     
-    WorkspaceFileListViewer *fileViewerController;
 }
 
 - (void) movieCreatorOfWorkspace: (NSString*)name;

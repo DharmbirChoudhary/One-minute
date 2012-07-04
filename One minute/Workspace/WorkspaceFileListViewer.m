@@ -16,6 +16,8 @@ NSInteger sort_id(id a, id b, void *reverse) {
 
 @implementation WorkspaceFileListViewer
 
+@synthesize currentWorkspace = _currentWorkspace;
+
 - (id)initWithStyle:(UITableViewStyle)style
 {
     self = [super initWithStyle:style];
@@ -27,6 +29,7 @@ NSInteger sort_id(id a, id b, void *reverse) {
 
 - (void)dealloc
 {
+    [_currentWorkspace release];
     [super dealloc];
 }
 
@@ -46,7 +49,9 @@ NSInteger sort_id(id a, id b, void *reverse) {
 
     
     NSFileManager *manager = [NSFileManager defaultManager];
-    NSString *documents = [Utils documentsDirectory];
+    NSString *documents = [[Utils documentsDirectory] stringByAppendingPathComponent:_currentWorkspace];
+    
+    
     
     if (filesList != nil) {
         [filesList removeAllObjects];
@@ -72,7 +77,7 @@ NSInteger sort_id(id a, id b, void *reverse) {
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    [self.navigationController setNavigationBarHidden:NO animated:YES];
+//    [self.navigationController setNavigationBarHidden:NO animated:YES];
     [super viewWillAppear:animated];
 }
 
@@ -83,7 +88,7 @@ NSInteger sort_id(id a, id b, void *reverse) {
 
 - (void)viewWillDisappear:(BOOL)animated
 {
-    [self.navigationController setNavigationBarHidden:YES animated:YES];
+//    [self.navigationController setNavigationBarHidden:YES animated:YES];
     [super viewWillDisappear:animated];
 }
 

@@ -24,6 +24,7 @@
         [[self layer] setCornerRadius:15];
         [[self layer] setBorderColor:[UIColor whiteColor].CGColor];
         [self setBackgroundColor:[UIColor darkGrayColor]];
+        [self setClipsToBounds:YES];
     }
     return self;
 }
@@ -39,6 +40,23 @@
         [labelName setBackgroundColor:[UIColor clearColor]];
     }
     [self addSubview:labelName];
+    
+    UIImageView *imgView = [[UIImageView alloc] initWithFrame:CGRectMake(2, 22, self.frame.size.width-4, self.frame.size.height-22)];
+    [self addSubview:imgView];
+    
+    NSFileManager *manager = [NSFileManager defaultManager];
+    NSString *documents = [[Utils documentsDirectory] stringByAppendingPathComponent:title];
+    [manager removeItemAtPath:[documents stringByAppendingPathComponent:@"movie.mov"] error:nil];
+    NSArray *files = [manager contentsOfDirectoryAtPath:documents error:nil];
+    
+    if ([files count] > 0) {
+        NSString *filename = [documents stringByAppendingPathComponent:[files objectAtIndex:0]];
+        UIImage *first = [UIImage imageWithContentsOfFile:filename];
+        [imgView setImage:first];        
+    }
+    
+    
+    [imgView release];
     
 }
 

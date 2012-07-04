@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import <MessageUI/MessageUI.h>
 
+#import "WorkspaceFileListViewer.h"
+
 @interface EncoderImagesToMovie : UIViewController <MFMailComposeViewControllerDelegate, UIActionSheetDelegate> {
     IBOutlet UIProgressView *progressView;
     float delta;
@@ -18,6 +20,8 @@
     IBOutlet UIImageView *imgscreen;
     
     NSString *currentWorkspace;
+    
+    WorkspaceFileListViewer *fileViewerController;
 }
 - (IBAction) createMovie;
 
